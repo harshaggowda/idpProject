@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans;
+  }
+}
+
+/* Custom map marker animations */
+.leaflet-marker-icon {
+  transition: transform 0.3s ease;
+}
+.leaflet-marker-icon:hover {
+  transform: scale(1.2) !important;
+}
