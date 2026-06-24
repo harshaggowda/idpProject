@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Live GPS Tracker</title>
+
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+
+        body {
+
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+        }
+
+        #map {
+
+            height: 70vh;
+            width: 100%;
+        }
+
+        .panel {
+
+            padding: 20px;
+            background: #1e1e1e;
+        }
+
+        .status {
+
+            color: lime;
+            font-weight: bold;
+        }
+
+        h2 {
+
+            margin-top: 0;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="panel">
+
+        <h2>📍 Live GPS Tracker</h2>
+
+        <p>Status:
+            <span id="status" class="status">
+                Waiting...
+            </span>
+        </p>
+
+        <p>Latitude:
+            <span id="lat">-</span>
+        </p>
+
+        <p>Longitude:
+            <span id="lng">-</span>
+        </p>
+
+        <p>Accuracy:
+            <span id="accuracy">-</span>
+        </p>
+
+        <p>Last Updated:
+            <span id="time">-</span>
+        </p>
+
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+
+        // ======================================
+        // INITIALIZE MAP
+        // ======================================
+
+        const map = L.map('map').setView([0, 0], 18);
+
+        L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                attribution: '© OpenStreetMap'
+            }
+        ).addTo(map);
+
+        // ======================================
+        // MARKER
+        // ======================================
+
+        let marker = L.marker([0, 0]).addTo(map);
+
+        // ======================================
+        // PATH LINE
+        // ======================================
+
+        let path = [];
+
+        let polyline = L.polyline(path, {
+            color: 'red'
+        }).addTo(map);
+
+        // ======================================
+        // GPS TRACKING
+        // ======================================
+
+        navigator.geolocation.watchPosition(
+
+            (position) => {
+
+                const lat = position.coords.latitude;
+
+                const lng = position.coords.longitude;
+
+                const accuracy =
+                    position.coords.accuracy;
+
+                // ==================================
+                // TIMESTAMP
+                // ==================================
+
+                const now = new Date();
+
+                const timestamp =
+                    now.getFullYear() + "-" +
+                    String(now.getMonth() + 1).padStart(2, '0') + "-" +
+                    String(now.getDate()).padStart(2, '0') + " " +
+                    String(now.getHours()).padStart(2, '0') + ":" +
+                    String(now.getMinutes()).padStart(2, '0') + ":" +
+                    String(now.getSeconds()).padStart(2, '0');
+
+                // ==================================
+                // UPDATE UI
+                // ==================================
+
+                document.getElementById("status")
+                    .innerText = "ACTIVE";
+
+                document.getElementById("lat")
+                    .innerText = lat;
+
+                document.getElementById("lng")
+                    .innerText = lng;
+
+                document.getElementById("accuracy")
+                    .innerText = accuracy + " meters";
+
+                document.getElementById("time")
+                    .innerText = timestamp;
+
+                // ==================================
+                // UPDATE MAP
+                // ==================================
+
+                marker.setLatLng([lat, lng]);
+
+                map.setView([lat, lng]);
+
+                // ==================================
+                // UPDATE PATH
+                // ==================================
+
+                path.push([lat, lng]);
+
+                polyline.setLatLngs(path);
+
+                // ==================================
+                // CONSOLE LOG
+                // ==================================
+
+                console.log({
+
+                    latitude: lat,
+                    longitude: lng,
+                    accuracy: accuracy,
+                    timestamp: timestamp
+
+                });
+
+            },
+
+            (error) => {
+
+                document.getElementById("status")
+                    .innerText = "GPS ERROR";
+
+                console.log(error);
+
+            },
+
+            {
+
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 5000
+
+            }
+
+        );
+
+    </script>
+
+</body>
+
+</html>

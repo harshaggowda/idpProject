@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, Play, CheckCircle } from 'lucide-react';
+import { RefreshCw, Play, CheckCircle, Cpu } from 'lucide-react';
 import api from '../utils/api';
-import { generateMockData } from '../utils/mockGenerator';
+import { generateMockData, generateSensorWindows } from '../utils/mockGenerator';
 
 const AdminPanel = () => {
   const [tickets, setTickets] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [simulating, setSimulating] = useState(false);
+  const [lastResult, setLastResult] = useState(null);
 
   const fetchTickets = async () => {
     try {
@@ -41,6 +43,16 @@ const AdminPanel = () => {
     setGenerating(false);
   };
 
+  const handleSimulateSensor = async () => {
+    setSimulating(true);
+    setLastResult(null);
+    const results = await generateSensorWindows(6); // send 6 synthetic windows
+    const detected = results.filter(r => r.type && r.type !== 'Smooth');
+    setLastResult(`Sent 6 windows → ${detected.length} anomalies detected`);
+    await fetchTickets();
+    setSimulating(false);
+  };
+
   const filteredTickets = tickets.filter(t => filter === 'all' ? true : t.status === filter);
 
   return (
@@ -51,7 +63,7 @@ const AdminPanel = () => {
           <p className="text-slate-500 mt-1">Manage reported road conditions and tickets.</p>
         </div>
         
-        <div className="flex space-x-4">
+        <div className="flex flex-wrap gap-3">
           <button 
             onClick={fetchTickets}
             className="flex items-center space-x-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
@@ -67,8 +79,24 @@ const AdminPanel = () => {
             {generating ? <RefreshCw className="animate-spin" size={18} /> : <Play size={18} />}
             <span>Generate Mock Data</span>
           </button>
+          <button
+            onClick={handleSimulateSensor}
+            disabled={simulating}
+            className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-70"
+            title="Sends synthetic MPU6050 windows through the Signal Processing Engine"
+          >
+            {simulating ? <RefreshCw className="animate-spin" size={18} /> : <Cpu size={18} />}
+            <span>Simulate Sensor Windows</span>
+          </button>
         </div>
       </div>
+
+      {lastResult && (
+        <div className="mb-4 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl flex items-center space-x-2">
+          <Cpu size={16} />
+          <span>{lastResult}</span>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 overflow-hidden flex flex-col">
         <div className="p-4 border-b border-slate-200 flex space-x-2">

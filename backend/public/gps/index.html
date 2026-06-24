@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GPS Streaming Module</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/gps.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GPS Module</h1>
+            <div class="status-badge" id="statusBadge">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">Initializing...</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="card data-card">
+                <div class="data-row">
+                    <span class="label">Latitude</span>
+                    <span class="value" id="latValue">--.------</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Longitude</span>
+                    <span class="value" id="lngValue">--.------</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Accuracy</span>
+                    <span class="value"><span id="accValue">--</span> m</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Last Update</span>
+                    <span class="value" id="timeValue">--:--:--</span>
+                </div>
+            </div>
+
+            <div class="card console-card">
+                <h3>System Messages</h3>
+                <div class="console" id="messageConsole">
+                    <!-- Messages will be injected here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/gps.js"></script>
+</body>
+</html>
