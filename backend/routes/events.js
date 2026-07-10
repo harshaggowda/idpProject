@@ -34,36 +34,41 @@ router.post('/', async (req, res) => {
   const { latitude, longitude, type, severity } = req.body;
 
   try {
-    // 1. Find if there are active tickets nearby (within 10 meters) of the same type
-    const activeTickets = await Ticket.find({ issue_type: type, status: { $ne: 'resolved' } });
-    
-    let matchedTicket = null;
-    for (let ticket of activeTickets) {
-      const distance = getDistanceInMeters(latitude, longitude, ticket.location_center.latitude, ticket.location_center.longitude);
-      if (distance <= 10) { // 10 meters radius
-        matchedTicket = ticket;
-        break;
-      }
-    }
-
     let ticketId = null;
 
-    if (matchedTicket) {
-      // Update existing ticket
-      matchedTicket.number_of_reports += 1;
-      matchedTicket.updated_at = new Date();
-      // Recalculate center? For simplicity, we keep original center.
-      await matchedTicket.save();
-      ticketId = matchedTicket._id;
-    } else {
-      // Create a new ticket
-      const newTicket = new Ticket({
-        location_center: { latitude, longitude },
-        issue_type: type,
-        number_of_reports: 1
-      });
-      await newTicket.save();
-      ticketId = newTicket._id;
+    // Humps (speed breakers) are informational only — they are shown on the
+    // map as Events but never raise a maintenance ticket. Only potholes are
+    // clustered into tickets.
+    if (type === 'pothole') {
+      // 1. Find if there are active tickets nearby (within 10 meters) of the same type
+      const activeTickets = await Ticket.find({ issue_type: type, status: { $ne: 'resolved' } });
+
+      let matchedTicket = null;
+      for (let ticket of activeTickets) {
+        const distance = getDistanceInMeters(latitude, longitude, ticket.location_center.latitude, ticket.location_center.longitude);
+        if (distance <= 10) { // 10 meters radius
+          matchedTicket = ticket;
+          break;
+        }
+      }
+
+      if (matchedTicket) {
+        // Update existing ticket
+        matchedTicket.number_of_reports += 1;
+        matchedTicket.updated_at = new Date();
+        // Recalculate center? For simplicity, we keep original center.
+        await matchedTicket.save();
+        ticketId = matchedTicket._id;
+      } else {
+        // Create a new ticket
+        const newTicket = new Ticket({
+          location_center: { latitude, longitude },
+          issue_type: type,
+          number_of_reports: 1
+        });
+        await newTicket.save();
+        ticketId = newTicket._id;
+      }
     }
 
     // 2. Create the event

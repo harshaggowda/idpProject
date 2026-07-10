@@ -109,9 +109,11 @@ async function ingestWindow(req, res) {
     }
 
     // ── 6. Cluster: find nearby active ticket of the same type ─
-    // Only attempt clustering if we have GPS coordinates
+    // Humps (speed breakers) are informational only — they are shown on the
+    // map as Events but never raise a maintenance ticket. Only potholes are
+    // clustered into tickets. Clustering also requires GPS coordinates.
     let ticketId = null;
-    if (latitude !== null && longitude !== null) {
+    if (dbType === 'pothole' && latitude !== null && longitude !== null) {
       const activeTickets = await Ticket.find({
         issue_type: dbType,
         status: { $ne: 'resolved' },

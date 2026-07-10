@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import MapView from './pages/MapView';
 import AdminPanel from './pages/AdminPanel';
+import AIReport from './pages/AIReport';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/map" element={<MapView />} />
+            <Route path="/report" element={<AIReport />} />
             <Route path="/admin" element={<AdminPanel />} />
           </Routes>
         </main>

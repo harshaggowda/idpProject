@@ -1,11 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Map as MapIcon, Settings } from 'lucide-react';
+import { LayoutDashboard, Map as MapIcon, Settings, FileText } from 'lucide-react';
 
 const Sidebar = () => {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Map View', path: '/map', icon: <MapIcon size={20} /> },
+    { name: 'AI Report', path: '/report', icon: <FileText size={20} /> },
     { name: 'Admin Panel', path: '/admin', icon: <Settings size={20} /> },
   ];
 

@@ -1,7 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, Play, CheckCircle, Cpu } from 'lucide-react';
+import { RefreshCw, Play, CheckCircle, Cpu, MapPin } from 'lucide-react';
 import api from '../utils/api';
 import { generateMockData, generateSensorWindows } from '../utils/mockGenerator';
+import { reverseGeocode } from '../utils/geocode';
+
+// Shows the human-readable address for a coordinate, with the raw lat/lng as a
+// subtitle. The address is fetched lazily (and cached) via OpenStreetMap Nominatim.
+const LocationCell = ({ latitude, longitude }) => {
+  const [state, setState] = useState({ address: null, loading: true });
+  const { address, loading } = state;
+
+  useEffect(() => {
+    let active = true;
+    reverseGeocode(latitude, longitude).then((addr) => {
+      if (active) setState({ address: addr, loading: false });
+    });
+    return () => { active = false; };
+  }, [latitude, longitude]);
+
+  return (
+    <div className="flex items-start space-x-2">
+      <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
+      <div>
+        <div className="text-sm text-slate-700">
+          {loading ? (
+            <span className="text-slate-400">Resolving address…</span>
+          ) : (
+            address || <span className="text-slate-400">Address unavailable</span>
+          )}
+        </div>
+        <div className="text-xs font-mono text-slate-400">
+          {latitude.toFixed(5)}, {longitude.toFixed(5)}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AdminPanel = () => {
   const [tickets, setTickets] = useState([]);
@@ -126,7 +160,7 @@ const AdminPanel = () => {
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm">
                   <th className="p-4 font-medium">Ticket ID</th>
                   <th className="p-4 font-medium">Type</th>
-                  <th className="p-4 font-medium">Location (Lat, Lng)</th>
+                  <th className="p-4 font-medium">Location</th>
                   <th className="p-4 font-medium">Reports</th>
                   <th className="p-4 font-medium">Status</th>
                   <th className="p-4 font-medium text-right">Actions</th>
@@ -143,8 +177,11 @@ const AdminPanel = () => {
                         {ticket.issue_type}
                       </span>
                     </td>
-                    <td className="p-4 text-sm text-slate-600">
-                      {ticket.location_center.latitude.toFixed(5)}, {ticket.location_center.longitude.toFixed(5)}
+                    <td className="p-4">
+                      <LocationCell
+                        latitude={ticket.location_center.latitude}
+                        longitude={ticket.location_center.longitude}
+                      />
                     </td>
                     <td className="p-4 text-sm font-medium text-slate-700">
                       {ticket.number_of_reports}

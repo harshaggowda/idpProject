@@ -16,7 +16,11 @@ router.get('/', async (req, res) => {
 // GET dashboard stats
 router.get('/stats', async (req, res) => {
   try {
-    const totalPotholes = await Event.countDocuments({ type: 'pothole' });
+    // Count UNIQUE potholes, not raw reports. Repeated detections of the same
+    // pothole are clustered into a single Ticket (10 m radius), so the number
+    // of distinct potholes equals the number of pothole tickets — not the
+    // number of pothole Events (which would double-count each re-report).
+    const totalPotholes = await Ticket.countDocuments({ issue_type: 'pothole' });
     const totalHumps = await Event.countDocuments({ type: 'hump' });
     const activeTickets = await Ticket.countDocuments({ status: { $ne: 'resolved' } });
     const resolvedTickets = await Ticket.countDocuments({ status: 'resolved' });
